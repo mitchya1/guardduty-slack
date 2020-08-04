@@ -114,8 +114,8 @@ type GuardDutyRemoteIPDetails struct {
 		CountryName string `json:"countryName"`
 	} `json:"country"`
 	GeoLocation struct {
-		Lat int `json:"lat"`
-		Lon int `json:"lon"`
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lon"`
 	} `json:"geoLocation"`
 	IPAddressV4  string `json:"ipAddressV4"`
 	Organization struct {

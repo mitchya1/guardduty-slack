@@ -44,6 +44,11 @@ func SendSlackMessage(findings GuardDutyFindingDetails) error {
 			SlackFields{Title: "Instance ID", Value: findings.Resource.InstanceDetails.InstanceID, Short: true},
 			SlackFields{Title: "Suspect Action", Value: "Instance behavior", Short: true},
 		)
+	case "S3Bucket":
+		f = append(f,
+			SlackFields{Title: "Bucket Name", Value: findings.Resource.BucketDetails[0].Name, Short: true},
+			SlackFields{Title: "Type", Value: findings.Resource.BucketDetails[0].Type, Short: true},
+		)
 	default:
 		log.Printf("Unknown action type %s", findings.Resource.ResourceType)
 		f = append(f,
@@ -51,7 +56,7 @@ func SendSlackMessage(findings GuardDutyFindingDetails) error {
 		)
 	}
 
-	log.Println(f)
+	//log.Println(f)
 
 	sm := SlackMessage{
 		Text: fmt.Sprintf("GuardDuty Alert in %s. Confidence: %d", findings.Region, findings.Confidence),

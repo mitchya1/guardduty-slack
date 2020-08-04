@@ -22,6 +22,7 @@ func lambdaHandler(event events.CloudWatchEvent) error {
 		return err
 	}
 
+	log.Println("GuardDuty event: ", guardDutyFindings)
 	SendSlackMessage(guardDutyFindings)
 
 	return nil

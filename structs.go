@@ -2,7 +2,7 @@ package main
 
 // AWS docs found here https://docs.aws.amazon.com/guardduty/latest/APIReference/API_GetFindings.html#API_GetFindings_ResponseSyntax
 
-// GuardDutyFindingDetails contains the actual findings from GuardDuty
+// GuardDutyFindingDetails contains the body of findings from GuardDuty
 type GuardDutyFindingDetails struct {
 	AccountID   string `json:"accountId"`
 	ARN         string `json:"arn"`
@@ -13,16 +13,17 @@ type GuardDutyFindingDetails struct {
 	Partition   string `json:"partition"`
 	Region      string `json:"region"`
 	// Resource
-	SchemaVersion string                   `json:"schemaVersion"`
-	Resource      GuardDutyResourceActions `json:"resource"`
-	Service       GuardDutyServiceActions  `json:"service"`
-	Severity      int                      `json:"severity"`
-	Title         string                   `json:"title"`
-	Type          string                   `json:"type"`
-	UpdatedAt     string                   `json:"updatedAt"`
+	SchemaVersion string            `json:"schemaVersion"`
+	Resource      GuardDutyResource `json:"resource"`
+	Service       GuardDutyService  `json:"service"`
+	Severity      int               `json:"severity"`
+	Title         string            `json:"title"`
+	Type          string            `json:"type"`
+	UpdatedAt     string            `json:"updatedAt"`
 }
 
-type GuardDutyResourceActions struct {
+// GuardDutyResource is the resource that triggered the finding
+type GuardDutyResource struct {
 	AccessKeyDetails struct {
 		AccessKeyID string `json:"accessKeyId"`
 		PrincipalID string `json:"principalId"`
@@ -54,10 +55,12 @@ type GuardDutyResourceActions struct {
 		} `json:"tags"`
 		ResourceGroup string `json:"resourceGroup"`
 	} `json:"instanceDetails"`
-	ResourceType string `json:"resourceType"`
+	BucketDetails []GuardDutyS3BucketDetail `json:"s3BucketDetails"`
+	ResourceType  string                    `json:"resourceType"`
 }
 
-type GuardDutyServiceActions struct {
+// GuardDutyService is the service that triggered the finding
+type GuardDutyService struct {
 	Action struct {
 		ActionType       string `json:"actionType"`
 		AWSAPICallAction struct {
@@ -104,7 +107,7 @@ type GuardDutyServiceActions struct {
 	UserFeedback string `json:"userFeedback"`
 }
 
-// GuardDutyRemoteIPDetails provides details about the remote IP address involved in the alert
+// GuardDutyRemoteIPDetails provides details about the remote IP address involved in the finding
 type GuardDutyRemoteIPDetails struct {
 	City struct {
 		CityName string `json:"cityName"`
@@ -126,7 +129,7 @@ type GuardDutyRemoteIPDetails struct {
 	} `json:"organization"`
 }
 
-// GuardDutyPortDetails provides information about the ports involved in the alert
+// GuardDutyPortDetails provides information about the ports involved in the finding
 type GuardDutyPortDetails struct {
 	Port     int    `json:"port"`
 	PortName string `json:"portName"`
@@ -141,7 +144,7 @@ type GuardDutyPortProbeDetails struct {
 	RemoteIPDetails  GuardDutyRemoteIPDetails `json:"remoteIpDetails"`
 }
 
-// GuardDutyNetworkInterfaces provides information about the network interface related to an alert
+// GuardDutyNetworkInterfaces provides information about the network interface related to a finding
 type GuardDutyNetworkInterfaces struct {
 	IPv6Addresses      []string `json:"ipv6Addresses"`
 	NetworkInterfaceID string   `json:"networkInterfaceId"`
@@ -159,6 +162,54 @@ type GuardDutyNetworkInterfaces struct {
 	} `json:"securityGroups"`
 	SubnetID string `json:"subnetId"`
 	VPCID    string `json:"vpcId"`
+}
+
+// GuardDutyS3BucketDetail contains details about a bucket that triggered a finding
+type GuardDutyS3BucketDetail struct {
+	ARN string `json:"arn"`
+	//CreatedAt
+	DefaultServerSideEncryption struct {
+		EncryptionType  string `json:"encryptionType"`
+		KMSMasterKeyARN string `json:"kmsMasterKeyArn"`
+	} `json:"defaultServerSideEncryption"`
+	Name  string `json:"name"`
+	Owner struct {
+		ID string `json:"id"`
+	} `json:"owner"`
+	Tags []struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	} `json:"tags"`
+	Type         string `json:"type"`
+	PublicAccess struct {
+		EffectivePermissions    string `json:"effectivePermissions"`
+		PermissionConfiguration struct {
+			AccountLevelPermissions struct {
+				BlockPublicAccess struct {
+					BlockPublicACLs       bool `json:"blockPublicAcls"`
+					BlockPublicPolicy     bool `json:"blockPublicPolicy"`
+					IgnorePublicACLs      bool `json:"ignorePublicAcls"`
+					RestrictPublicBuckets bool `json:"restrictPublicBuckets"`
+				} `json:"blockPublicAccess"`
+			} `json:"accountLevelPermissions"`
+			BucketLevelPermissions struct {
+				ACL struct {
+					AllowPublicRead  bool `json:"allowsPublicReadAccess"`
+					AllowPublicWrite bool `json:"allowsPublicWriteAccess"`
+				} `json:"accessControlList"`
+				BlockPublicAccess struct {
+					BlockPublicACLs       bool `json:"blockPublicAcls"`
+					BlockPublicPolicy     bool `json:"blockPublicPolicy"`
+					IgnorePublicACLs      bool `json:"ignorePublicAcls"`
+					RestrictPublicBuckets bool `json:"restrictPublicBuckets"`
+				} `json:"blockPublicAccess"`
+				BucketPolicy struct {
+					AllowPublicRead  bool `json:"allowsPublicReadAccess"`
+					AllowPublicWrite bool `json:"allowsPublicWriteAccess"`
+				} `json:"bucketPolicy"`
+			} `json:"bucketLevelPermissions"`
+		} `json:"permissionsConfiguration"`
+	}
 }
 
 // SlackMessage is the message we send to Slack

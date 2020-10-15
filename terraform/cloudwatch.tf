@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_rule" "guardduty" {
   name        = "guardduty-lambda"
   description = "Send GuardDuty events to Lambda"
-  role_arn = aws_lambda_permission.allow_cloudwatch.arn
+  //role_arn = aws_lambda_permission.allow_cloudwatch.arn
   is_enabled = true
   tags = {
     env      = var.environment

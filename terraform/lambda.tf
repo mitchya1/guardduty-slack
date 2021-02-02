@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "lambda" {
   function_name                  = format("%s-%s", var.environment, var.app_name)
-  s3_bucket                      = "YOUR_BUCKET"
+  s3_bucket                      = var.lambda_bundle_s3_bucket
   s3_key                         = format("%s/latest.zip", var.environment)
   role                           = aws_iam_role.role.arn
   handler                        = "main" // binary will be named api

@@ -81,16 +81,16 @@ PATTERN
 
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
-    rule = aws_cloudwatch_event_rule.guardduty.name
-    arn = aws_lambda_function.lambda.arn
+  rule = aws_cloudwatch_event_rule.guardduty.name
+  arn  = aws_lambda_function.lambda.arn
 }
 
 data "aws_cloudwatch_log_group" "lambda_log_group" {
-  name = format("/aws/lambda/%s-%s", var.environment, var.app_name)
+  name              = format("/aws/lambda/%s-%s", var.environment, var.app_name)
   retention_in_days = 3
 
   tags = {
-    env = var.environment
+    env      = var.environment
     app_name = var.app_name
   }
 }

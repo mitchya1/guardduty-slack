@@ -1,5 +1,5 @@
 resource "aws_iam_role" "role" {
-  name               = format("%s-%s-lambda-role", var.environment, var.app_name)
+  name = format("%s-%s-lambda-role", var.environment, var.app_name)
   tags = {
     env      = var.environment
     app_name = var.app_name

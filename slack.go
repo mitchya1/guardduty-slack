@@ -10,47 +10,51 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/guardduty"
 )
 
-func SendSlackMessage(findings GuardDutyFindingDetails) error {
+// SendSlackMessage sends a message to Slack
+// TODO replace this with the slack-go/slack library: https://github.com/slack-go/slack
+func SendSlackMessage(findings guardduty.Finding) error {
 	var (
 		f []SlackFields
 		c string
 	)
 
-	if findings.Severity < 5 {
+	if *findings.Severity < 5.0 {
 		c = "#439FE0"
-	} else if findings.Severity > 7 {
+	} else if *findings.Severity > 7.0 {
 		c = "danger"
 	} else {
 		c = "warning"
 	}
 
 	f = append(f,
-		SlackFields{Title: "Description", Value: findings.Description, Short: false},
-		SlackFields{Title: "Action Type", Value: findings.Service.Action.ActionType, Short: true},
-		SlackFields{Title: "Finding Type", Value: findings.Type, Short: false},
+		SlackFields{Title: "Description", Value: *findings.Description, Short: false},
+		SlackFields{Title: "Action Type", Value: *findings.Service.Action.ActionType, Short: true},
+		SlackFields{Title: "Finding Type", Value: *findings.Type, Short: false},
 	)
 
-	switch findings.Resource.ResourceType {
+	switch *findings.Resource.ResourceType {
 	case "AccessKey":
 		f = append(f,
 			SlackFields{Title: "Suspect Action", Value: "Access Key usage", Short: true},
 			SlackFields{Title: "Access Key", Value: "Access key usage", Short: true},
-			SlackFields{Title: "User", Value: findings.Resource.AccessKeyDetails.Username, Short: true},
+			SlackFields{Title: "User", Value: *findings.Resource.AccessKeyDetails.UserName, Short: true},
 		)
 	case "Instance":
 		f = append(f,
-			SlackFields{Title: "Instance ID", Value: findings.Resource.InstanceDetails.InstanceID, Short: true},
+			SlackFields{Title: "Instance ID", Value: *findings.Resource.InstanceDetails.InstanceId, Short: true},
 			SlackFields{Title: "Suspect Action", Value: "Instance behavior", Short: true},
 		)
 	case "S3Bucket":
 		f = append(f,
-			SlackFields{Title: "Bucket Name", Value: findings.Resource.BucketDetails[0].Name, Short: true},
-			SlackFields{Title: "Type", Value: findings.Resource.BucketDetails[0].Type, Short: true},
+			SlackFields{Title: "Bucket Name", Value: *findings.Resource.S3BucketDetails[0].Name, Short: true},
+			SlackFields{Title: "Type", Value: *findings.Resource.S3BucketDetails[0].Type, Short: true},
 		)
 	default:
-		log.Printf("Unknown action type %s", findings.Resource.ResourceType)
+		log.Printf("Unknown action type %s", *findings.Resource.ResourceType)
 		f = append(f,
 			SlackFields{Title: "Suspect Action", Value: "Undetermined", Short: true},
 		)
@@ -59,7 +63,7 @@ func SendSlackMessage(findings GuardDutyFindingDetails) error {
 	//log.Println(f)
 
 	sm := SlackMessage{
-		Text: fmt.Sprintf("GuardDuty Alert in %s. Confidence: %d", findings.Region, findings.Confidence),
+		Text: fmt.Sprintf("GuardDuty Alert in %s", *findings.Region),
 		Attachments: []SlackAttachments{
 			{
 				Text:   "New Findings",

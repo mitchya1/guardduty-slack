@@ -10,7 +10,8 @@ resource "aws_lambda_function" "lambda" {
   timeout                        = 3  // 5 second timeout
   environment {
     variables = {
-      SLACK_WEBHOOK = var.slack_webhook
+      SLACK_CHANNEL_ID = var.slack_channel_id
+      SLACK_TOKEN      = var.slack_bot_token
     }
   }
 

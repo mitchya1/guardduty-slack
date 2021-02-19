@@ -85,7 +85,7 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
   arn  = aws_lambda_function.lambda.arn
 }
 
-data "aws_cloudwatch_log_group" "lambda_log_group" {
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = format("/aws/lambda/%s-%s", var.environment, var.app_name)
   retention_in_days = 3
 
